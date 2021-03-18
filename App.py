@@ -2,10 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for
 from Predictor import makePrediction, refit
 from flask_restplus import Api, Resource, fields
 
+#Flask Instance
+
 app = Flask(__name__)
 api = Api(app = app, version="1.0", title="SlashMobility Predictor Program", description="Poject that returns if a patient has diabetes based on certain information")
 
 name_space = api.namespace('api', description='Main Route to predict')
+
+#Models used in the JSON request
 
 predictModel = api.model('Prediction Model', 
 		  {'pregnant': fields.Integer(required = True, description="Number of times pregnant", help="pregnant cannot be blank."),
@@ -29,6 +33,8 @@ validateModel = api.model('Validation Model',
 		  'age': fields.Integer(required = True, description="Age (years)", help="age cannot be blank."),
 		  'label': fields.Integer(required = True, description="0: She has not diabetes, 1: She has diabetes", help="label cannot be blank.")
 		  })
+
+#getPrediction
 
 @name_space.route("/getPrediction")
 class PredictorClass(Resource):
@@ -54,8 +60,8 @@ class PredictorClass(Resource):
 			hasDiabetesPr = valuePredicted['result'][0][1]
 			hasNotDiabetesPr = valuePredicted['result'][0][0]
 			return {
-				"yes": hasDiabetesPr,
-				"no": hasNotDiabetesPr
+				"yes": str(hasDiabetesPr) + "%",
+				"no": str(hasNotDiabetesPr) + "%"
 			}
 
 		except KeyError as e:
@@ -63,6 +69,9 @@ class PredictorClass(Resource):
 
 		except Exception as e:
 			name_space.abort(400, e.__doc__, status = "Could not make prediction, check proper fields", statusCode = "400")
+
+
+#validatePrediction
 
 @name_space.route("/validatePrediction")
 class ValidatorClass(Resource):
@@ -82,7 +91,7 @@ class ValidatorClass(Resource):
 			bmi = request.json["bmi"]
 			pedigree = request.json["pedigree"]
 			age =  request.json["age"]
-			label = json.form["label"]
+			label = request.json["label"]
 
 			refit(pregnant, glucose, bp, skin, insulin, bmi, pedigree, age, label)
 
@@ -96,42 +105,6 @@ class ValidatorClass(Resource):
 		except Exception as e:
 			name_space.abort(400, e.__doc__, status = "Could not make prediction, check proper fields", statusCode = "400")
 
-
-
-# @app.route("/getPrediction", methods = ["GET", "POST"])
-# def getPrediction():
-# 	if request.method == "POST":
-# 		pregnant = request.form["pregnant"]
-# 		glucose = request.form["glucose"]
-# 		bp = request.form["bp"]
-# 		skin = request.form["skin"]
-# 		insulin = request.form["insulin"]
-# 		bmi = request.form["bmi"]
-# 		pedigree = request.form["pedigree"]
-# 		age =  request.form["age"]
-# 		valuePredicted = makePrediction(pregnant, glucose, bp, skin, insulin, bmi, pedigree, age)
-
-# 		hasDiabetesPr = valuePredicted['result'][0][0]
-# 		hasNotDiabetesPr = valuePredicted['result'][0][0]
-# 		return str(valuePredicted)
-# 	return "You should use POST to get a Prediction, data in the body must be sent"
-
-# @app.route("/validateResponse", methods = ["GET", "POST"])
-# def validateResponse():
-# 	if request.method == "POST":
-# 		pregnant = request.form["pregnant"]
-# 		glucose = request.form["glucose"]
-# 		bp = request.form["bp"]
-# 		skin = request.form["skin"]
-# 		insulin = request.form["insulin"]
-# 		bmi = request.form["bmi"]
-# 		pedigree = request.form["pedigree"]
-# 		age =  request.form["age"]
-# 		label = request.form["label"]
-# 		refit(pregnant, glucose, bp, skin, insulin, bmi, pedigree, age, label)
-
-# 		return "OK"
-# 	return "You should use POST to refit the model, data in the body must be sent"
 
 app.debug = True
 app.run(host='0.0.0.0', port=5000)

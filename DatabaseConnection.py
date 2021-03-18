@@ -1,5 +1,6 @@
 from neo4j import GraphDatabase
 
+#Clase encargada de conectarse a una instancia de SGBD Neo4j
 class DatabaseConnection:
 
     def __init__(self, uri, name, password):
