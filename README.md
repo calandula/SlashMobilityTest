@@ -22,4 +22,8 @@ con su correspondiente probabilidad asociada.\
 **2**- A través de **validatePrediction** y las features + label de la predicción anterior se envía a reentrenar al modelo previamente guardado para no tener que reentrenarlo
 cada vez y los nuevos datos se guardan.
 
+## Explicación del método de resolución
+
+Para solventar el problema que se nos presenta, se ha requerido del clasificador DecisionTree que implementa a lo que llamamos un modelo basado en árboles de decisión. Este modelo obtenido entrenado a partir de los datos de los pacientes tiene un Accuracy de apróximadamente un 70%, lo cual es bastante aceptable. De hiperparámetros se ha visto que los que vienen por defecto son los más acertados. En la instanciación del clasificador vemos que por defecto usamos un splitter óptimo.
+
 
